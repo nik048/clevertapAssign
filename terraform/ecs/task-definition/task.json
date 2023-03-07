@@ -1,7 +1,7 @@
 [
     {
       "name": "wordpress-container",
-      "image": "nik048/wordpress-task:v1.0",
+      "image": "nik048/wordpress-task:IMAGE_TAG",
       "entryPoint": [],
       "essential": true,
       "portMappings": [
