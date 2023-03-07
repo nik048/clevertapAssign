@@ -18,3 +18,4 @@
 
  - Store the database password in a secret so that no one has access to it. Expose the password to the wordpress container so that it can use it to connect to the database
 
+
