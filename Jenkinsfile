@@ -15,6 +15,7 @@ pipeline{
         
         stage('Push image'){           
             steps{
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
                 sh "docker push nik048/wordpress-task:$BUILD_NUMBER"
             }
         }
