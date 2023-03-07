@@ -1,6 +1,8 @@
 pipeline{
     agent any
-
+    options {
+        ansiColor('xterm')
+    }
     environment {
         version = "1.0"
 		DOCKERHUB_CREDENTIALS=credentials('dockerhub-cred')
@@ -25,9 +27,20 @@ pipeline{
         stage('Update ecs with new image'){
             steps{
                 dir('terraform'){
-                    sh "sed -i -e 's/IMAGE_TAG/$BUILD_NUMBER/' ecs/task-definition/task.json"
-                    sh "AWS_SECRET_ACCESS_KEY=$AWS_ACCESS_KEY_USR AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_PSW terraform init"
-                    sh "AWS_SECRET_ACCESS_KEY=$AWS_ACCESS_KEY_USR AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_PSW  terraform apply -auto-approve"
+                    withCredentials([usernamePassword(credentialsId: 'aws_access_key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]){
+                        sh "sed -i -e 's/profile = \"aws-stage\"//' main.tf"
+                        sh "sed -i -e 's/IMAGE_TAG/$BUILD_NUMBER/' ecs/task-definition/task.json"
+                        sh """
+                           export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_PSW"
+                           export AWS_SECRET_ACCESS_KEY="$AWS_ACCESS_KEY_USR"
+                           terraform init
+                           """
+                        sh """
+                           
+                            terraform apply -auto-approve
+                        """
+                    }
+                    
                 }
             }
         }
