@@ -3,6 +3,7 @@ pipeline{
 
     environment {
         version = "1.0"
+		DOCKERHUB_CREDENTIALS=credentials('dockerhub-cred')
     }
 
     stages{
