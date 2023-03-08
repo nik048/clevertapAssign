@@ -24,4 +24,9 @@
 
  ![wp infra setup](wp_infra_setup.png)
 
+ ### Known caveats
+ - Mysql db is running as part of main container. Idealy shoud be a seperate common instance for all the containers.
+ - ALB is internal and in private subnet.
+ - Jenkins is running locally and exposed through ngrok 
+
 `docker run -d -v jenkins_home:/var/jenkins_home -v  /var/run/docker.sock:/var/run/docker.sock -p 8080:8080 -p 50000:50000 --restart=on-failure jenkins:DID_1_1` 
