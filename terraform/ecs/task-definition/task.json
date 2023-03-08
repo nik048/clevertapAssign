@@ -17,11 +17,11 @@
       "environment": [
         {
             "name": "WORDPRESS_DB_HOST",
-            "value": "value"
+            "value": "localhost"
         },
         {
           "name": "WORDPRESS_DB_NAME",
-          "value": "value"
+          "value": "wordpress_db"
         }
       ],
       "portMappings": [
