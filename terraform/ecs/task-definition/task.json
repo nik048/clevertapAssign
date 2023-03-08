@@ -4,6 +4,26 @@
       "image": "nik048/wordpress-task:IMAGE_TAG",
       "entryPoint": [],
       "essential": true,
+      "secrets": [
+        {
+          "name" : "WORDPRESS_DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:346084543109:secret:WP_USER_PASS-Thp7zH:WORDPRESS_DB_PASSWORD::"
+        },
+        {
+          "name": "WORDPRESS_DB_USER",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:346084543109:secret:WP_USER_PASS-Thp7zH:WORDPRESS_DB_USER::"
+        }
+      ],
+      "environment": [
+        {
+            "name": "WORDPRESS_DB_HOST",
+            "value": "value"
+        },
+        {
+          "name": "WORDPRESS_DB_NAME",
+          "value": "value"
+        }
+      ],
       "portMappings": [
         {
           "containerPort": 80,

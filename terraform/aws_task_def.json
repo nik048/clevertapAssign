@@ -1,0 +1,60 @@
+ {
+        "containerDefinitions": [
+            {
+                "name": "wordpress-container",
+                "image": "nik048/wordpress-task:6",
+                "cpu": 256,
+                "memory": 512,
+                "portMappings": [
+                    {
+                        "containerPort": 80,
+                        "hostPort": 80,
+                        "protocol": "tcp"
+                    }
+                ],
+                "essential": true,
+                "entryPoint": [],
+                "environment": [],
+                "mountPoints": [
+                    {
+                        "sourceVolume": "wp-upload",
+                        "containerPath": "/var/www/html/wp-content/uploads",
+                        "readOnly": false
+                    }
+                ],
+                "volumesFrom": [],
+                "logConfiguration": {
+                    "logDriver": "awslogs",
+                    "options": {
+                        "awslogs-group": "wordpress-logs",
+                        "awslogs-region": "ap-south-1",
+                        "awslogs-stream-prefix": "wordpress"
+                    }
+                }
+            }
+        ],
+        "family": "wordpress-ecs-task-definition",
+        "taskRoleArn": "arn:aws:iam::346084543109:role/wordpress-execution-task-role",
+        "executionRoleArn": "arn:aws:iam::346084543109:role/wordpress-execution-task-role",
+        "networkMode": "awsvpc",
+        "volumes": [
+            {
+                "name": "wp-upload",
+                "efsVolumeConfiguration": {
+                    "fileSystemId": "fs-05d8410a0cfd9f5fe",
+                    "rootDirectory": "/",
+                    "transitEncryption": "ENABLED",
+                    "authorizationConfig": {
+                        "accessPointId": "fsap-0a30871ca5c47c678",
+                        "iam": "ENABLED"
+                    }
+                }
+            }
+        ],
+        "placementConstraints": [],
+        "requiresCompatibilities": [
+            "FARGATE"
+        ],
+        "cpu": "256",
+        "memory": "512"
+    }

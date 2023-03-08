@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 resource "aws_ecs_cluster" "aws-ecs-cluster" {
   name = "${var.app_name}-cluster"
@@ -96,8 +98,31 @@ resource "aws_cloudwatch_log_group" "log-group" {
 resource "aws_iam_role" "ecsTaskExecutionRole" {
   name               = "${var.app_name}-execution-task-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
+  
+  inline_policy {
+    name = "secret_manager_secret_access"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect =  "Allow"
+          Action = [
+            #"ssm:GetParameters",
+            "secretsmanager:GetSecretValue"
+          ],
+          Resource = [
+            #"arn:aws:ssm:region:aws_account_id:parameter/parameter_name",
+            "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:WP_USER_PASS-Thp7zH",
+            #"arn:aws:kms:region:aws_account_id:key/key_id"
+          ],
+        }
+      ]
+    })
+  }
+
   tags = {
-    Name        = "${var.app_name}-iam-role"
+    Name = "${var.app_name}-iam-role"
   }
 }
 
