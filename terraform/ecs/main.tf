@@ -108,16 +108,45 @@ resource "aws_iam_role" "ecsTaskExecutionRole" {
         {
           Effect =  "Allow"
           Action = [
-            #"ssm:GetParameters",
             "secretsmanager:GetSecretValue"
           ],
           Resource = [
-            #"arn:aws:ssm:region:aws_account_id:parameter/parameter_name",
-            "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:WP_USER_PASS-Thp7zH",
-            #"arn:aws:kms:region:aws_account_id:key/key_id"
+            "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:WP_USER_PASS-Thp7zH"
           ],
         }
       ]
+    })
+  }
+
+  inline_policy {
+    name = "ecs_autoscaling"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+        Effect = "Allow"
+        Action = [
+          "application-autoscaling:*",
+          "ecs:DescribeServices",
+          "ecs:UpdateService",
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:DeleteAlarms",
+          "cloudwatch:DescribeAlarmHistory",
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:DescribeAlarmsForMetric",
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:ListMetrics",
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:DisableAlarmActions",
+          "cloudwatch:EnableAlarmActions",
+          "iam:CreateServiceLinkedRole"
+        ]
+        Resource = [
+          "*"
+        ]
+      }]
     })
   }
 
@@ -140,6 +169,29 @@ data "aws_iam_policy_document" "assume_role_policy" {
 resource "aws_iam_role_policy_attachment" "ecsTaskExecutionRole_policy" {
   role       = aws_iam_role.ecsTaskExecutionRole.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_appautoscaling_target" "ecs_target" {
+  max_capacity       = 2
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.aws-ecs-cluster.name}/${aws_ecs_service.aws-ecs-service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "ecs_policy" {
+  name               = "scale-down"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value = "50"
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+  }
 }
 
 resource "aws_alb" "application_load_balancer" {
